@@ -15,7 +15,7 @@
 ### SRP: Single Responsibility Principle
 SRP зарчимийн тодорхойлолт: Component бүр өөрийн ганц үүрэгтэй байхаар зохион бүтээх. Энэ нь code-ийг илүү readable, maintainable and scalable болгодог.
 
-**BAD example**
+**SRP ашиглаагүй component**
 ```tsx
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
@@ -103,7 +103,7 @@ export function Bad() {
 }
 ```
 
-**Good example**
+**SRP ашиглавал**
 
 Logic үйлдэл болон render хийж байгаа JSX code-ийг component болгон задлах. Хэрэв задалвал **filter.tsx**, **product.tsx** мөн logic үйлдлүүдийг **useProduct.tsx**, **useRateFilter.tsx** гэж custom hook үүсгэн задалсан байна. Product list харуулж байгаа хуудас дараах байдалтай харагдах нь.
 ```tsx
@@ -261,3 +261,87 @@ export function useRateFilter() {
   return { filterRate, handleRating };
 }
 ```
+### OCP: Open-Closed Principle
+OCP зарчимийн тодорхойлолт: Тухайн component өргөтгөл хийх боломжтой боловч өөрчлөхөд хаалттай байх ёстой. Жишээ нь **BUTTON** component дээр үзвэл. **BUTTON** component нь **Icon** харуулдаг гэж төсөөлье. Icon-ийг харуулахдаа **role** гэдэг prop-оор өөр өөр icon харуулах ёстой. Хэрэв OCP ашиглаагүй бол дараах байдалтай бичигдэх нь.
+
+**Button component without OCP**
+```tsx
+import { HiOutlineArrowNarrowRight, HiOutlineArrowNarrowLeft } from "react-icons/hi";
+
+interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  text: string;
+  role?: "back" | "forward";
+}
+
+export function Button(props: IButtonProps) {
+  const { text, role } = props;
+
+  return (
+    <button
+      className="flex items-center font-bold outline-none pt-4 pb-4 pl-8 pr-8 rounded-xl bg-gray-200 text-black"
+      {...props}
+    >
+      {text}
+      <div className="m-2">
+        {role === "forward" && <HiOutlineArrowNarrowRight />}
+        {role === "back" && <HiOutlineArrowNarrowLeft />}
+      </div>
+    </button>
+  );
+}
+```
+Хэрэв 10, 20, 30+ **icon** сонголттой хийе гэвэл role prop-ийн сонголт төдий чинээ нэмэгдэж JSX доторх render төдийн чинээ урт бичиглэлтэй болох нь.
+
+Харин **OCP** ашиглаж бичвэл тухайн icon үзүүлж байгаа хэсгийг **children** prop байдлаар аван дараах байдалтай харагдана.
+
+**Button component with OCP**
+```tsx
+interface IButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  text: string;
+  role?: "back" | "forward" | "main" | "not-found";
+  icon?: React.ReactNode;
+}
+
+export function Button(props: IButtonProps) {
+  const { text, icon } = props;
+
+  return (
+    <button
+      className="flex items-center font-bold outline-none pt-4 pb-4 pl-8 pr-8 rounded-xl bg-gray-200 text-black"
+      {...props}
+    >
+      {text}
+      <div className="m-2">
+        {icon}
+      </div>
+    </button>
+  );
+}
+```
+
+**Button component дуудахдаа**
+```tsx
+import { Button } from "./button";
+import {
+  HiOutlineArrowNarrowRight,
+  HiOutlineArrowNarrowLeft,
+} from "react-icons/hi";
+
+export function OCP() {
+  return (
+    <div className="flex space-x-10">
+      <Button
+        text="Go Home"
+        icon={<HiOutlineArrowNarrowRight />}
+      />
+      <Button
+        text="Go Back"
+        icon={<HiOutlineArrowNarrowLeft />}
+      />
+    </div>
+  );
+}
+```
+
+Ингэснээр Icon-ий variant нэмэгдэхээс үл хамааран **Button** component-д өөрчлөлт орохгүй юм.
