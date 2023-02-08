@@ -12,7 +12,7 @@
 - ISP: Interface Segregation Principle
 - DIP: Dependency Inversion Principle
 
-### SRP: Single Responsibility Principle
+### 1. SRP: Single Responsibility Principle
 SRP зарчимийн тодорхойлолт: Component бүр өөрийн ганц үүрэгтэй байхаар зохион бүтээх. Энэ нь code-ийг илүү readable, maintainable and scalable болгодог.
 
 **SRP ашиглаагүй component**
@@ -261,7 +261,7 @@ export function useRateFilter() {
   return { filterRate, handleRating };
 }
 ```
-### OCP: Open-Closed Principle
+### 2. OCP: Open-Closed Principle
 OCP зарчимийн тодорхойлолт: Тухайн component өргөтгөл хийх боломжтой боловч өөрчлөхөд хаалттай байх ёстой. Жишээ нь **BUTTON** component дээр үзвэл. **BUTTON** component нь **Icon** харуулдаг гэж төсөөлье. Icon-ийг харуулахдаа **role** гэдэг prop-оор өөр өөр icon харуулах ёстой. Хэрэв OCP ашиглаагүй бол дараах байдалтай бичигдэх нь.
 
 **Button component without OCP**
@@ -292,14 +292,13 @@ export function Button(props: IButtonProps) {
 ```
 Хэрэв 10, 20, 30+ **icon** сонголттой хийе гэвэл role prop-ийн сонголт төдий чинээ нэмэгдэж JSX доторх render төдийн чинээ урт бичиглэлтэй болох нь.
 
-Харин **OCP** ашиглаж бичвэл тухайн icon үзүүлж байгаа хэсгийг **children** prop байдлаар аван дараах байдалтай харагдана.
+Харин **OCP** ашиглаж бичвэл role prop-ийн оронд тухайн icon үзүүлж байгаа хэсгийг **children** prop байдлаар аван дараах байдалтай бичнэ.
 
 **Button component with OCP**
 ```tsx
 interface IButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   text: string;
-  role?: "back" | "forward" | "main" | "not-found";
   icon?: React.ReactNode;
 }
 
@@ -344,4 +343,100 @@ export function OCP() {
 }
 ```
 
-Ингэснээр Icon-ий variant нэмэгдэхээс үл хамааран **Button** component-д өөрчлөлт орохгүй юм.
+Ингэснээр Icon-ий variant нэмэгдэхээс үл хамааран **Button** component-д өөрчлөлт орохгүй юм. Гэхдээ дуудаж байгаа газраасаа хүссэн Icon-оо харуулах боломжтой юм.
+
+### 3. LCP: Liskov Substitution Principle
+LCP зарчимын тодорхойлолт: Тухайн component нь supertype буюу native element-ийн attributes-ийг дэмждэг байхаар хийх. Жишээ нь search хийдэг **input text** component хийе гэж бодьё. Хэрэв тухайн component-ийг зөвхөн search хийдэг байдлаар хийе гэвэл зөвхөн **value**, **onChange** гэсэн function дамжуулахад хангалттай. Код дараах хэлбэртэй.
+
+**searchInput.tsx**
+
+```tsx
+export function SearchInput(props) {
+  const { value, onChange } = props;
+
+  return (
+    <input
+      type="search"
+      id="default-search"
+      placeholder="Search for the right one..."
+      required
+      value={value}
+      onChange={onChange}
+    />
+  );
+}
+```
+Хэрэв **searchInput.tsx** component-ийн **onFocus**, **onEnter** гэх мэт event-ийг parent component дээр нь сонсох хэрэгцээ гарвал яах вэ? **onFocus**, **onBlur** гэх мэт бүх event-ийг тусад нь onChange шиг бичих нь утгагүй. Тиймээс **SuperParent** html input-аас attribute-уудыг extend хийж авснаар энэ асуудлыг амархан шийдэж болно. Код дараах байдлаар харагдана.
+
+**searchInput.tsx** extended attributes
+```tsx
+interface ISearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  isLarge?: boolean;
+}
+
+export function SearchInput(props: ISearchInputProps) {
+  const { value, isLarge, ...restProps } = props;
+
+  return (
+    <input
+      type="search"
+      id="default-search"
+      placeholder="Search for the right one..."
+      className={`${isLarge ? "w-full" : "w-auto"}`}
+      required
+      value={value}
+      {...restProps}
+    />
+  );
+}
+```
+Ингэснээр дуудаж ашиглаж байгаа parent component-ууд **onFocus**, **onBlur** гэх мэт event-үүдийг ашиглах боломжтой болох юм.
+
+### 4. ICP: Interface Segregation Principle
+
+ICP зарчимын тодорхойлолт: Тухайн component шаардлагагүй **Interface**-ээс хамаарах ёсгүй. Жишээ нь Product component-ийн зурагийг нь харуулдаг **Thumbnail** component байя гэж бодьё. **Thumbnail** component нь зөвхөн alt text-тэй img tag байна гэж үзвэл **Thumbnail** component нь **Product** interface-ийг бүтнээр авдаг байх нь буруу гэсэн үг.
+
+**Bad example**
+```tsx
+import { IProduct } from "./product";
+
+interface IThumbnailProps {
+  product: IProduct;
+}
+
+export function Thumbnail(props: IThumbnailProps) {
+  const { product } = props;
+
+  return (
+    <img
+      className="p-8 rounded-t-lg h-48"
+      src={product.image}
+      alt={product.title}
+    />
+  );
+}
+```
+
+**Good example**
+```tsx
+interface IThumbnailProps {
+  imageUrl: string;
+  altText: string;
+}
+
+export function Thumbnail(props: IThumbnailProps) {
+  const { imageUrl, altText } = props;
+
+  return (
+    <img
+      className="p-8 rounded-t-lg h-48"
+      src={imageUrl}
+      alt={altText}
+    />
+  );
+}
+```
+
+### 5. DIP - Dependency Inversion Principle
+
+DIP зарчимын тодорхойлолт: Хараат байдлын урвуу зарчим. Нэн чухал шаардлагатай гэж үзээгүй тул оруулсангүй. Бас сайн ойлгосонгүй.
