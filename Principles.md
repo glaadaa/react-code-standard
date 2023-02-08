@@ -1,6 +1,6 @@
 # React code standards and principles 
 
-Энэхүү documentation нь react app хөгжүүлэхэд ямар стандарт баримтлах мөн ямар зарчим баримтлавал зохих талаар байх болно. 
+Энэхүү documentation нь react app хөгжүүлэхэд ямар зарчим баримтлавал зохих талаар байх болно. 
 
 ## Баримтлавал зохих зарчим S.O.L.I.D principles
 
