@@ -77,6 +77,10 @@ git commit -m "Commit text here"
 
 Энэ үед pre-commit Hook ажиллуулж болдог ба үүнийг ашиглан хүссэн command урьдчилж ажиллуулж болох юм. Жишээ нь дээрх command ажиллахаас өмнө **lint** check хийгээд давхар **test** ажиллуулж болох юм. Хэрэв аль нэг дээр нь унавал code push хийгдэхгүй stage буцдаг гэсэн үг.
 
+Жишээ GIF
+
+![Husky gif](https://miro.medium.com/max/1280/1*I2f3BQBudA4KNRmzBQrXGQ.gif)
+
 Дээрх tool-үүдийг тохируулсан жишээ project эндээс харах боломжтой.
 
 **https://github.com/glaadaa/my-custom-boilerplate**
